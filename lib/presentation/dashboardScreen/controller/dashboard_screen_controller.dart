@@ -1,33 +1,131 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:translator/translator.dart';
 
 
 class DashboardScreenController extends GetxController {
   TextEditingController searchController = TextEditingController();
-
   final SupabaseClient _supabase = Supabase.instance.client;
-
-  List<String> allDepartments = [];
-  List<String> filteredDepartments = [];
+  List<Map<String, dynamic>> allDepartments = [];
+  List<Map<String, dynamic>> filteredDepartments = [];
+  bool isLoading = false;
 
   @override
   void onInit() {
     super.onInit();
     searchController.addListener(() {
-      filterDepartments(searchController.text);
+      filterDepartments();
     });
+    fetchDepartments();
   }
 
-  void filterDepartments(String query) {
-    if (query.isEmpty) {
+  // Fetch departments with JOIN
+  Future<void> fetchDepartments({bool showLoading = true}) async {
+    try {
+      if (showLoading) {
+        isLoading = true;
+        update();
+      }
+
+      final data = await _supabase
+          .from('department')
+          .select('id, name:department_name(id, english, hindi, punjabi), images, floor_number, location, room_number');
+
+      allDepartments = List<Map<String, dynamic>>.from(data);
+      filteredDepartments = List.from(allDepartments);
+
+      if (showLoading) {
+        isLoading = false;
+      }
+      update();
+    } catch (e) {
+      if (showLoading) {
+        isLoading = false;
+      }
+      update();
+      Get.snackbar('Error', 'Failed to fetch departments: ${e.toString()}');
+    }
+  }
+
+  // Filter departments based on search text
+  void filterDepartments() {
+    final searchText = searchController.text.toLowerCase();
+    final selectedLang = Get.locale?.languageCode ?? 'en';
+
+    if (searchText.isEmpty) {
       filteredDepartments = List.from(allDepartments);
     } else {
-      filteredDepartments = allDepartments
-          .where((dept) => dept.toLowerCase().contains(query.toLowerCase()))
-          .toList();
+      filteredDepartments = allDepartments.where((data) {
+        final nameData = data['name'];
+        String name = '';
+        if (nameData != null && nameData is Map) {
+          if (selectedLang == 'hi') {
+            name = nameData['hindi'] ?? nameData['english'] ?? '';
+          } else if (selectedLang == 'pa') {
+            name = nameData['punjabi'] ?? nameData['english'] ?? '';
+          } else {
+            name = nameData['english'] ?? '';
+          }
+        }
+        return name.toLowerCase().contains(searchText);
+      }).toList();
     }
     update();
+  }
+
+  // Get display name based on selected language
+  String getDisplayName(Map<String, dynamic> nameData, String selectedLang) {
+    if (selectedLang == 'hi') {
+      return nameData['hindi'] ?? nameData['english'] ?? 'Unknown';
+    } else if (selectedLang == 'pa') {
+      return nameData['punjabi'] ?? nameData['english'] ?? 'Unknown';
+    } else {
+      return nameData['english'] ?? 'Unknown';
+    }
+  }
+
+  // Auto-translate and save to Supabase
+  Future<void> autoTranslateAndSave(
+      String nameId, String english, String? hindi, String? punjabi) async {
+    final translator = GoogleTranslator();
+
+    try {
+      // Skip if all 3 languages already exist
+      if (hindi != null &&
+          hindi.isNotEmpty &&
+          punjabi != null &&
+          punjabi.isNotEmpty &&
+          hindi != english &&
+          punjabi != english) {
+        return;
+      }
+
+      print("🌐 Translating: $english");
+
+      // Translate to Hindi if missing
+      String hindiText = (hindi == null || hindi.isEmpty || hindi == english)
+          ? (await translator.translate(english, to: 'hi')).text
+          : hindi;
+
+      // Translate to Punjabi if missing
+      String punjabiText = (punjabi == null || punjabi.isEmpty || punjabi == english)
+          ? (await translator.translate(english, to: 'pa')).text
+          : punjabi;
+
+      // Update department_name table
+      await _supabase.from('department_name').update({
+        'hindi': hindiText,
+        'punjabi': punjabiText,
+      }).eq('id', nameId);
+
+      print("✅ Supabase updated with Hindi & Punjabi translations");
+
+      // Refresh data to show updated translations
+      await fetchDepartments();
+    } catch (e) {
+      print("❌ Translation error: $e");
+    }
   }
 }
 

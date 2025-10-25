@@ -23,8 +23,6 @@ class LoginScreenController extends GetxController {
     update();
   }
 
-
-
   Future<void> login() async {
     isLoading = true;
     update();
@@ -34,6 +32,7 @@ class LoginScreenController extends GetxController {
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
+      print("login result -- $result");
 
       if (result['success'] == true) {
         final role = result['role'];

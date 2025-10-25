@@ -81,23 +81,27 @@ class SupabaseServices {
             'role': userDetails['role'],
           };
         } else {
+          print("Login failed else 1 ---");
           return {
             'success': false,
             'error': 'User details not found in database',
           };
         }
       } else {
+        print("Login failed else 2 ---");
         return {
           'success': false,
           'error': 'Login failed',
         };
       }
     } on AuthException catch (e) {
+      print("Login auth exc. error --- $e");
       return {
         'success': false,
         'error': e.message,
       };
     } catch (e) {
+      print("Login catch error --- $e");
       return {
         'success': false,
         'error': e.toString(),

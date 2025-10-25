@@ -36,48 +36,63 @@ class _CustomMenuDropdownState extends State<CustomMenuDropdown> {
     var offset = renderBox.localToGlobal(Offset.zero);
 
     return OverlayEntry(
-      builder: (context) => Positioned(
-        top: offset.dy + size.height + 5,
-        left: offset.dx,
-        width: 180,
-        child: Material(
-          color: Colors.transparent,
-          child: CompositedTransformFollower(
-            link: _layerLink,
-            showWhenUnlinked: false,
-            offset: Offset(0, size.height + 5),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 6,
-                    offset: Offset(0, 3),
-                  )
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildMenuItem("logout".tr, () async{
-                    print("Logout clicked");
-                    await SupabaseServices.signOut();
-                    await PrefUtils.clearPreferencesData();
-                    Get.offAll(()=> LogInScreen());
-                  }),
-                  _buildMenuItem("language_select".tr, () async{
-                    showLanguageDialog();
-                    print("Language select clicked");
-        
-                    _toggleDropdown();
-                  }),
-                ],
+      builder: (context) => Stack(
+        children: [
+          // Transparent barrier to detect outside clicks
+          Positioned.fill(
+            child: GestureDetector(
+              onTap: _toggleDropdown,
+              behavior: HitTestBehavior.translucent,
+              child: Container(
+                color: Colors.transparent,
               ),
             ),
           ),
-        ),
+          // Dropdown menu
+          Positioned(
+            top: offset.dy + size.height + 5,
+            left: offset.dx,
+            width: 180,
+            child: Material(
+              color: Colors.transparent,
+              child: CompositedTransformFollower(
+                link: _layerLink,
+                showWhenUnlinked: false,
+                offset: Offset(0, size.height + 5),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 6,
+                        offset: Offset(0, 3),
+                      )
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildMenuItem("logout".tr, () async{
+                        print("Logout clicked");
+                        await SupabaseServices.signOut();
+                        await PrefUtils.clearPreferencesData();
+                        Get.offAll(()=> LogInScreen());
+                      }),
+                      _buildMenuItem("language_select".tr, () async{
+                        showLanguageDialog();
+                        print("Language select clicked");
+
+                        _toggleDropdown();
+                      }),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -127,6 +142,8 @@ class _CustomMenuDropdownState extends State<CustomMenuDropdown> {
                   await PrefUtils.setLanguageCode('en', 'US');
                   await PrefUtils.setLanguage(true);
                   Navigator.pop(context, "English");
+                  // Trigger re-filter in controllers
+                  _toggleDropdown();
                 },
               ),
               const Divider(),
@@ -136,9 +153,10 @@ class _CustomMenuDropdownState extends State<CustomMenuDropdown> {
                 onTap: () async {
                   Get.updateLocale(const Locale('hi', 'IN'));
                   await PrefUtils.setLanguageCode('hi', 'IN');
-
                   await PrefUtils.setLanguage(true);
                   Navigator.pop(context, "Hindi");
+                  // Trigger re-filter in controllers
+                  _toggleDropdown();
                 },
               ),
               const Divider(),
@@ -148,9 +166,10 @@ class _CustomMenuDropdownState extends State<CustomMenuDropdown> {
                 onTap: () async {
                   Get.updateLocale(const Locale('pa', 'IN'));
                   await PrefUtils.setLanguageCode('pa', 'IN');
-
                   await PrefUtils.setLanguage(true);
                   Navigator.pop(context, "Punjabi");
+                  // Trigger re-filter in controllers
+                  _toggleDropdown();
                 },
               ),
               Align(

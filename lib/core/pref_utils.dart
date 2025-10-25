@@ -79,10 +79,23 @@ class PrefUtils {
 
   // ---------------- CLEAR PREFS ----------------
   static Future<void> clearPreferencesData() async {
+    // Save language data before clearing
     bool? languageValue = _sharedPreferences!.getBool('language');
+    String? languageCode = _sharedPreferences!.getString(_languageCodeKey);
+    String? countryCode = _sharedPreferences!.getString(_countryCodeKey);
+
+    // Clear all preferences
     await _sharedPreferences!.clear();
+
+    // Restore language data
     if (languageValue != null) {
       await _sharedPreferences!.setBool('language', languageValue);
+    }
+    if (languageCode != null) {
+      await _sharedPreferences!.setString(_languageCodeKey, languageCode);
+    }
+    if (countryCode != null) {
+      await _sharedPreferences!.setString(_countryCodeKey, countryCode);
     }
   }
 }

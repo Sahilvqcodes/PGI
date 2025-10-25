@@ -1,8 +1,6 @@
 import 'dart:io';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
@@ -10,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../admin_dashboard_screen.dart';
+import 'admin_dashboard_controller_screen.dart';
 
 class AddDepartmentControllerScreen extends GetxController
     with WidgetsBindingObserver {
@@ -53,13 +52,11 @@ class AddDepartmentControllerScreen extends GetxController
       roomNumber.text = data['room_number']?.toString() ?? '';
 
       // Load existing image URLs if any
-      if (data['images'] != null) {
-        if (data['images'] is List) {
-          existingImageUrls.addAll(List<String>.from(data['images']));
-        } else if (data['images'] is String) {
-          // Handle if images is stored as comma-separated string
-          final imageList = (data['images'] as String).split(',');
-          existingImageUrls.addAll(imageList.where((s) => s.isNotEmpty));
+      if (data['images'] != null && data['images'] is List) {
+        for (var item in data['images']) {
+          if (item is String && item.isNotEmpty && item.startsWith('http')) {
+            existingImageUrls.add(item);
+          }
         }
       }
     }
@@ -110,7 +107,8 @@ class AddDepartmentControllerScreen extends GetxController
     update();
 
     try {
-      List<String> imageUrls = List.from(existingImageUrls);
+      // Start with clean list of existing image URLs
+      List<String> imageUrls = List<String>.from(existingImageUrls);
 
       // Upload new images if added
       for (File file in images) {
@@ -186,6 +184,11 @@ class AddDepartmentControllerScreen extends GetxController
       roomNumber.clear();
       images.clear();
       existingImageUrls.clear();
+
+      // Refresh admin dashboard to show new/updated department (silently, without loading indicator)
+      if (Get.isRegistered<AdminDashboardControllerScreen>()) {
+        await Get.find<AdminDashboardControllerScreen>().fetchDepartments(showLoading: false);
+      }
 
       Get.offAll(() => AdminDashboardScreen());
     } catch (e) {

@@ -94,6 +94,7 @@ class SplashScreenState extends State<SplashScreen> {
                 title: const Text("English"),
                 onTap: () async {
                   Get.updateLocale(const Locale('en', 'US'));
+                  await PrefUtils.setLanguageCode('en', 'US');
                   await PrefUtils.setLanguage(true);
                   Navigator.pop(context, "English");
                 },
@@ -104,6 +105,7 @@ class SplashScreenState extends State<SplashScreen> {
                 title: const Text("हिंदी (Hindi)"),
                 onTap: () async {
                   Get.updateLocale(const Locale('hi', 'IN'));
+                  await PrefUtils.setLanguageCode('hi', 'IN');
                   await PrefUtils.setLanguage(true);
                   Navigator.pop(context, "Hindi");
                 },
@@ -114,6 +116,7 @@ class SplashScreenState extends State<SplashScreen> {
                 title: const Text("ਪੰਜਾਬੀ (Punjabi)"),
                 onTap: () async {
                   Get.updateLocale(const Locale('pa', 'IN'));
+                  await PrefUtils.setLanguageCode('pa', 'IN');
                   await PrefUtils.setLanguage(true);
                   Navigator.pop(context, "Punjabi");
                 },

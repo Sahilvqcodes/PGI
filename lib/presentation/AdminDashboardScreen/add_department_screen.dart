@@ -100,53 +100,53 @@ class AddDepartmentScreen extends StatelessWidget {
               validator: (value) => value == null || value.isEmpty ? "please_enter_room_number".tr : null,
             ),
             const SizedBox(height: 20),
-            // SizedBox(
-            //   height: 44,
-            //   child: ListView.builder(
-            //     scrollDirection: Axis.horizontal,
-            //     itemCount: controller.images.length + 1,
-            //     itemBuilder: (context, index) {
-            //       if (index < controller.images.length) {
-            //         return Padding(
-            //           padding: const EdgeInsets.symmetric(horizontal: 4),
-            //           child: Container(
-            //             height: 44,
-            //             width: 54,
-            //             decoration: BoxDecoration(borderRadius: BorderRadius.circular(6)),
-            //             child: ClipRRect(
-            //               borderRadius: BorderRadius.circular(6),
-            //               child: Image.file(
-            //                 controller.images[index],
-            //                 height: 44,
-            //                 width: 54,
-            //                 fit: BoxFit.cover,
-            //               ),
-            //             ),
-            //           ),
-            //         );
-            //       } else {
-            //         return Padding(
-            //           padding: const EdgeInsets.symmetric(horizontal: 4),
-            //           child: GestureDetector(
-            //             onTap: () => showImagePickerSheet(controller),
-            //             child: DottedBorder(
-            //               color: Colors.black,
-            //               strokeWidth: 1.5,
-            //               borderType: BorderType.RRect,
-            //               radius: const Radius.circular(6),
-            //               dashPattern: const [4, 3],
-            //               child: const SizedBox(
-            //                 height: 44,
-            //                 width: 54,
-            //                 child: Icon(Icons.add, color: Colors.black),
-            //               ),
-            //             ),
-            //           ),
-            //         );
-            //       }
-            //     },
-            //   ),
-            // ),
+            SizedBox(
+              height: 64,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: controller.images.length + 1,
+                itemBuilder: (context, index) {
+                  if (index < controller.images.length) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Container(
+                        height: 64,
+                        width: 74,
+                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(6)),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(6),
+                          child: Image.file(
+                            controller.images[index],
+                            height: 64,
+                            width: 74,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    );
+                  } else {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: GestureDetector(
+                        onTap: () => showImagePickerSheet(controller),
+                        child: DottedBorder(
+                          color: Colors.black,
+                          strokeWidth: 1.5,
+                          borderType: BorderType.RRect,
+                          radius: const Radius.circular(6),
+                          dashPattern: const [4, 3],
+                          child: const SizedBox(
+                            height: 64,
+                            width: 74,
+                            child: Icon(Icons.add, color: Colors.black),
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                },
+              ),
+            ),
             const SizedBox(height: 30),
             controller.isLoading
                 ? const CustomLoadingContainer()
