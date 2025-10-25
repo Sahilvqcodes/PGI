@@ -1,0 +1,55 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "com.google.gms.google-services"   // 🔥 Firebase plugin
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+android {
+    namespace "com.example.chandigarh"
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.example.chandigarh"
+        minSdk 23
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            // TODO: Add your own signing config for the release build.
+            // Signing with the debug keys for now, so `flutter run --release` works.
+            signingConfig = signingConfigs.debug
+        }
+    }
+
+//    buildTypes {
+//        release {
+//            minifyEnabled false
+//            shrinkResources false
+//            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+//        }
+//    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.22"
+
+    // Firebase BOM (keeps versions consistent)
+    implementation platform("com.google.firebase:firebase-bom:33.1.2")
+
+    // Firebase libraries
+    implementation "com.google.firebase:firebase-analytics"
+    implementation "com.google.firebase:firebase-auth"
+    implementation "com.google.firebase:firebase-firestore"
+}
