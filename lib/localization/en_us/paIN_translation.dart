@@ -26,6 +26,7 @@ final Map<String, String> paIN = {
   "please_enter_department_name": "ਕਿਰਪਾ ਕਰਕੇ ਆਪਣਾ ਵਿਭਾਗ ਨਾਮ ਦਰਜ ਕਰੋ",
   "location_required": "ਸਥਾਨ ਲੋੜੀਂਦਾ ਹੈ",
   "please_enter_floor_number": "ਕਿਰਪਾ ਕਰਕੇ ਮੰਜਿਲ ਨੰਬਰ ਦਰਜ ਕਰੋ",
+  "please_enable_location_to_save_data": "ਕਿਰਪਾ ਕਰਕੇ ਡਾਟਾ ਸੰਭਾਲਣ ਲਈ ਲੋਕੇਸ਼ਨ ਐਨੇਬਲ ਕਰੋ",
   "enter_floor_number": "ਆਪਣਾ ਮੰਜਿਲ ਨੰਬਰ ਦਰਜ ਕਰੋ",
   "enter_room_number": "ਆਪਣਾ ਕਮਰਾ ਨੰਬਰ ਦਰਜ ਕਰੋ",
   "please_enter_room_number": "ਕਿਰਪਾ ਕਰਕੇ ਕਮਰਾ ਨੰਬਰ ਦਰਜ ਕਰੋ",

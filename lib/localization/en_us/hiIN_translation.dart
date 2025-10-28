@@ -26,6 +26,7 @@ final Map<String, String> hiIN = {
   "please_enter_department_name": "कृपया अपना विभाग नाम दर्ज करें",
   "location_required": "स्थान आवश्यक है",
   "please_enter_floor_number": "कृपया मंज़िल संख्या दर्ज करें",
+  "please_enable_location_to_save_data": "कृपया डेटा सहेजने के लिए लोकेशन सक्षम करें",
   "enter_floor_number": "अपनी मंज़िल संख्या दर्ज करें",
   "enter_room_number": "अपना कमरा नंबर दर्ज करें",
   "please_enter_room_number": "कृपया कमरा नंबर दर्ज करें",

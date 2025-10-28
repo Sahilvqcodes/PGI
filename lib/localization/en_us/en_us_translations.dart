@@ -26,6 +26,7 @@ final Map<String, String> enUS = {
   "please_enter_department_name": "Please enter your Department name",
   "location_required": "Location required",
   "please_enter_floor_number": "Please enter Floor Number",
+  "please_enable_location_to_save_data": "Please enable location to save data",
   "enter_floor_number": "Enter your Floor Number",
   "enter_room_number": "Enter your Room Number",
   "please_enter_room_number": "Please enter Room Number",

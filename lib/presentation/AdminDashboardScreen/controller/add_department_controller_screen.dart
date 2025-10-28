@@ -8,7 +8,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:translator/translator.dart';
-
 import '../admin_dashboard_screen.dart';
 import 'admin_dashboard_controller_screen.dart';
 
@@ -23,6 +22,7 @@ class AddDepartmentControllerScreen extends GetxController
   final List<File> images = [];
   final List<String> existingImageUrls = []; // For editing existing images
   final keyDepartment = GlobalKey<FormState>();
+  bool fetchingLocation = false;
 
   // Edit mode fields
   bool isEditing = false;
@@ -36,16 +36,13 @@ class AddDepartmentControllerScreen extends GetxController
     WidgetsBinding.instance.addObserver(this);
     getCurrentLocation();
 
-    // Check if data is passed via Get.arguments
     final args = Get.arguments;
     if (args != null) {
       isEditing = true;
       recordId = args['id']?.toString();
       final data = args['data'] as Map<String, dynamic>;
-      // Get department name from department_name table
       final nameData = data['name'];
       if (nameData != null && nameData is Map) {
-        // Use English as default for editing
         departmentName.text = nameData['english'] ?? '';
       }
 
@@ -53,20 +50,18 @@ class AddDepartmentControllerScreen extends GetxController
       floorNumber.text = data['floor_number']?.toString() ?? '';
       roomNumber.text = data['room_number']?.toString() ?? '';
 
-      // Load existing image URLs if any
       if (data['images'] != null) {
         if (data['images'] is String) {
-          // If it's a string, try to parse it as JSON array
           String imagesStr = data['images'] as String;
-          // Remove extra quotes and brackets if present
           imagesStr = imagesStr.replaceAll(r'\"', '"').trim();
 
-          // Try to decode as JSON
           try {
             final decoded = jsonDecode(imagesStr);
             if (decoded is List) {
               for (var item in decoded) {
-                if (item is String && item.isNotEmpty && item.startsWith('http')) {
+                if (item is String &&
+                    item.isNotEmpty &&
+                    item.startsWith('http')) {
                   existingImageUrls.add(item);
                 }
               }
@@ -75,7 +70,6 @@ class AddDepartmentControllerScreen extends GetxController
             print("Failed to decode images JSON: $e");
           }
         } else if (data['images'] is List) {
-          // If it's already a list
           for (var item in data['images']) {
             if (item is String && item.isNotEmpty && item.startsWith('http')) {
               existingImageUrls.add(item);
@@ -95,9 +89,50 @@ class AddDepartmentControllerScreen extends GetxController
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      // User wapas app me aaya → location check karlo
       getCurrentLocation();
     }
+  }
+
+  /// Validate location field contains proper Lat/Long format
+  String? validateLocation(String? value) {
+    if (value == null || value.isEmpty) {
+      return "location_required".tr;
+    }
+
+    // Check for error states
+    if (value.contains("location_disabled") ||
+        value.contains("location_denied_forever")) {
+      return "please_enable_location_services".tr;
+    }
+
+    if (value.contains("fetching_location") ||
+        value.contains("failed_to_fetch_location")) {
+      return "please_wait_for_location".tr;
+    }
+
+    // Validate Lat/Long format: "Lat: XX.XXXX, Lon: YY.YYYY"
+    final latLonPattern = RegExp(r'Lat:\s*-?\d+\.\d+,\s*Lon:\s*-?\d+\.\d+');
+    if (!latLonPattern.hasMatch(value)) {
+      return "please_enable_location_to_save_data".tr;
+    }
+
+    return null; // Validation passed
+  }
+
+  /// Validate floor number is not empty
+  String? validateFloorNumber(String? value) {
+    if (value == null || value.isEmpty) {
+      return "please_enter_floor_number".tr;
+    }
+    return null;
+  }
+
+  /// Validate room number is not empty
+  String? validateRoomNumber(String? value) {
+    if (value == null || value.isEmpty) {
+      return "please_enter_room_number".tr;
+    }
+    return null;
   }
 
   /// Translate department name to all three languages
@@ -105,61 +140,36 @@ class AddDepartmentControllerScreen extends GetxController
     final translator = GoogleTranslator();
 
     try {
-      print("🔍 Detecting language for: $inputText");
-
-      // First, check if text contains Devanagari script (Hindi)
       bool isHindiScript = RegExp(r'[\u0900-\u097F]').hasMatch(inputText);
-      // Check if text contains Gurmukhi script (Punjabi)
       bool isPunjabiScript = RegExp(r'[\u0A00-\u0A7F]').hasMatch(inputText);
-
       String englishText = inputText;
       String hindiText = inputText;
       String punjabiText = inputText;
 
       if (isHindiScript) {
-        // Input is in Hindi (Devanagari script)
-        print("🔍 Detected Hindi script (Devanagari)");
         hindiText = inputText;
-
-        // Translate Hindi to English
-        final englishTranslation = await translator.translate(inputText, from: 'hi', to: 'en');
+        final englishTranslation =
+            await translator.translate(inputText, from: 'hi', to: 'en');
         englishText = englishTranslation.text;
-        print("✅ Translated to English: $englishText");
-
-        // Translate English to Punjabi
-        final punjabiTranslation = await translator.translate(englishText, from: 'en', to: 'pa');
+        final punjabiTranslation =
+            await translator.translate(englishText, from: 'en', to: 'pa');
         punjabiText = punjabiTranslation.text;
-        print("✅ Translated to Punjabi: $punjabiText");
-
       } else if (isPunjabiScript) {
-        // Input is in Punjabi (Gurmukhi script)
-        print("🔍 Detected Punjabi script (Gurmukhi)");
         punjabiText = inputText;
-
-        // Translate Punjabi to English
-        final englishTranslation = await translator.translate(inputText, from: 'pa', to: 'en');
+        final englishTranslation =
+            await translator.translate(inputText, from: 'pa', to: 'en');
         englishText = englishTranslation.text;
-        print("✅ Translated to English: $englishText");
-
-        // Translate English to Hindi
-        final hindiTranslation = await translator.translate(englishText, from: 'en', to: 'hi');
+        final hindiTranslation =
+            await translator.translate(englishText, from: 'en', to: 'hi');
         hindiText = hindiTranslation.text;
-        print("✅ Translated to Hindi: $hindiText");
-
       } else {
-        // Input is likely English (no Indic script detected)
-        print("🔍 Detected English (Latin script)");
         englishText = inputText;
-
-        // Translate to Hindi
-        final hindiTranslation = await translator.translate(englishText, from: 'en', to: 'hi');
+        final hindiTranslation =
+            await translator.translate(englishText, from: 'en', to: 'hi');
         hindiText = hindiTranslation.text;
-        print("✅ Translated to Hindi: $hindiText");
-
-        // Translate to Punjabi
-        final punjabiTranslation = await translator.translate(englishText, from: 'en', to: 'pa');
+        final punjabiTranslation =
+            await translator.translate(englishText, from: 'en', to: 'pa');
         punjabiText = punjabiTranslation.text;
-        print("✅ Translated to Punjabi: $punjabiText");
       }
 
       return {
@@ -169,7 +179,6 @@ class AddDepartmentControllerScreen extends GetxController
       };
     } catch (e) {
       print("❌ Translation error: $e");
-      // Fallback: return same text for all languages
       return {
         'english': inputText,
         'hindi': inputText,
@@ -208,11 +217,12 @@ class AddDepartmentControllerScreen extends GetxController
     isLoading = true;
     update();
 
-    try {
-      // Start with clean list of existing image URLs
-      List<String> imageUrls = List<String>.from(existingImageUrls);
+    while (fetchingLocation) {
+      await Future.delayed(Duration(milliseconds: 200));
+    }
 
-      // Upload new images if added
+    try {
+      List<String> imageUrls = List<String>.from(existingImageUrls);
       for (File file in images) {
         String? url = await uploadImage(file);
         if (url != null) {
@@ -221,14 +231,11 @@ class AddDepartmentControllerScreen extends GetxController
           Get.snackbar("Error", "Image upload failed");
         }
       }
-
-      // Translate department name to all three languages
-      final translations = await translateDepartmentName(departmentName.text.trim());
-
+      final translations =
+          await translateDepartmentName(departmentName.text.trim());
       String? nameId;
 
       if (isEditing && recordId != null) {
-        // Get existing department to find name_id
         final existing = await _supabase
             .from('department')
             .select('name')
@@ -237,7 +244,6 @@ class AddDepartmentControllerScreen extends GetxController
 
         nameId = existing['name'];
 
-        // Update department_name table with properly translated values
         await _supabase.from('department_name').update({
           'english': translations['english']!,
           'hindi': translations['hindi']!,
@@ -255,7 +261,6 @@ class AddDepartmentControllerScreen extends GetxController
 
         Get.snackbar("Success", "Department updated successfully");
       } else {
-        // Create new department_name entry with properly translated values
         final nameResponse = await _supabase
             .from('department_name')
             .insert({
@@ -267,8 +272,6 @@ class AddDepartmentControllerScreen extends GetxController
             .single();
 
         nameId = nameResponse['id'].toString();
-
-        // Create new department entry
         await _supabase.from('department').insert({
           'name': nameId,
           'location': location.text.trim(),
@@ -376,6 +379,7 @@ class AddDepartmentControllerScreen extends GetxController
 
   Future<void> getCurrentLocation() async {
     location.text = "fetching_location".tr;
+    fetchingLocation = true;
     update();
 
     bool serviceEnabled;
@@ -384,6 +388,7 @@ class AddDepartmentControllerScreen extends GetxController
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       location.text = "location_disabled".tr;
+      fetchingLocation = false;
       update();
       showLocationDialog();
       return;
@@ -394,6 +399,7 @@ class AddDepartmentControllerScreen extends GetxController
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
         location.text = "location_disabled".tr;
+        fetchingLocation = false;
         update();
         return;
       }
@@ -401,6 +407,7 @@ class AddDepartmentControllerScreen extends GetxController
 
     if (permission == LocationPermission.deniedForever) {
       location.text = "location_denied_forever".tr;
+      fetchingLocation = false;
       update();
       return;
     }
@@ -410,11 +417,13 @@ class AddDepartmentControllerScreen extends GetxController
           desiredAccuracy: LocationAccuracy.high);
 
       location.text = "Lat: ${position.latitude}, Lon: ${position.longitude}";
+      fetchingLocation = false;
       update(); // GetBuilder ko refresh kar do
 
       print("Latitude: ${position.latitude}, Longitude: ${position.longitude}");
     } catch (e) {
       location.text = "failed_to_fetch_location".tr;
+      fetchingLocation = false;
       update();
     }
   }
@@ -433,7 +442,7 @@ class AddDepartmentControllerScreen extends GetxController
           ),
           TextButton(
             onPressed: () async {
-              await Geolocator.openLocationSettings(); // Settings open
+              await Geolocator.openLocationSettings();
               Get.back(); // Dialog close
             },
             child: Text("enable".tr),

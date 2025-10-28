@@ -11,8 +11,6 @@ const LatLng pgiCenter = LatLng(30.7649, 76.7739);
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Initialize Supabase
   await Supabase.initialize(
     url: AppConstants.SUPABASE_URL,
     anonKey: AppConstants.SUPABASE_ANON_KEY,

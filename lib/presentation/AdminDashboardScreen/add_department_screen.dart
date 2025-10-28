@@ -81,7 +81,7 @@ class AddDepartmentScreen extends StatelessWidget {
               controller: controller.location,
               hintText: "",
               prefixIcon: const Icon(Icons.location_on_outlined, color: Color(0xFF0D2C54), size: 20),
-              validator: (value) => value == null || value.isEmpty ? "location_required".tr : null,
+              validator: controller.validateLocation,
             ),
             const SizedBox(height: 20),
             CustomTextFormField(
@@ -89,7 +89,7 @@ class AddDepartmentScreen extends StatelessWidget {
               textInputType: TextInputType.number,
               hintText: "enter_floor_number".tr,
               prefixIcon: const Icon(Icons.home, color: Color(0xFF0D2C54), size: 20),
-              validator: (value) => value == null || value.isEmpty ? "please_enter_floor_number".tr : null,
+              validator: controller.validateFloorNumber,
             ),
             const SizedBox(height: 20),
             CustomTextFormField(
@@ -97,7 +97,7 @@ class AddDepartmentScreen extends StatelessWidget {
               hintText: "enter_room_number".tr,
               textInputType: TextInputType.number,
               prefixIcon: const Icon(Icons.home, color: Color(0xFF0D2C54), size: 20),
-              validator: (value) => value == null || value.isEmpty ? "please_enter_room_number".tr : null,
+              validator: controller.validateRoomNumber,
             ),
             const SizedBox(height: 20),
             SizedBox(
