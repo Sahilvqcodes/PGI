@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -52,10 +53,32 @@ class AddDepartmentControllerScreen extends GetxController
       roomNumber.text = data['room_number']?.toString() ?? '';
 
       // Load existing image URLs if any
-      if (data['images'] != null && data['images'] is List) {
-        for (var item in data['images']) {
-          if (item is String && item.isNotEmpty && item.startsWith('http')) {
-            existingImageUrls.add(item);
+      if (data['images'] != null) {
+        if (data['images'] is String) {
+          // If it's a string, try to parse it as JSON array
+          String imagesStr = data['images'] as String;
+          // Remove extra quotes and brackets if present
+          imagesStr = imagesStr.replaceAll(r'\"', '"').trim();
+
+          // Try to decode as JSON
+          try {
+            final decoded = jsonDecode(imagesStr);
+            if (decoded is List) {
+              for (var item in decoded) {
+                if (item is String && item.isNotEmpty && item.startsWith('http')) {
+                  existingImageUrls.add(item);
+                }
+              }
+            }
+          } catch (e) {
+            print("Failed to decode images JSON: $e");
+          }
+        } else if (data['images'] is List) {
+          // If it's already a list
+          for (var item in data['images']) {
+            if (item is String && item.isNotEmpty && item.startsWith('http')) {
+              existingImageUrls.add(item);
+            }
           }
         }
       }
@@ -187,7 +210,8 @@ class AddDepartmentControllerScreen extends GetxController
 
       // Refresh admin dashboard to show new/updated department (silently, without loading indicator)
       if (Get.isRegistered<AdminDashboardControllerScreen>()) {
-        await Get.find<AdminDashboardControllerScreen>().fetchDepartments(showLoading: false);
+        await Get.find<AdminDashboardControllerScreen>()
+            .fetchDepartments(showLoading: false);
       }
 
       Get.offAll(() => AdminDashboardScreen());
@@ -222,6 +246,22 @@ class AddDepartmentControllerScreen extends GetxController
         images.add(compressed);
         print("Image added from gallery: ${compressed.path}");
       }
+      update();
+    }
+  }
+
+  // Remove existing image URL
+  void removeExistingImage(int index) {
+    if (index >= 0 && index < existingImageUrls.length) {
+      existingImageUrls.removeAt(index);
+      update();
+    }
+  }
+
+  // Remove newly picked image
+  void removeNewImage(int index) {
+    if (index >= 0 && index < images.length) {
+      images.removeAt(index);
       update();
     }
   }

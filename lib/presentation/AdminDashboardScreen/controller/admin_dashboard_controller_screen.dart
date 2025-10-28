@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -94,6 +95,35 @@ class AdminDashboardControllerScreen extends GetxController {
     } else {
       return nameData['english'] ?? 'Unknown';
     }
+  }
+
+  // Get first image URL from images field
+  String? getFirstImageUrl(dynamic images) {
+    if (images == null) return null;
+
+    try {
+      if (images is String) {
+        // Try to parse JSON string
+        String imagesStr = images.replaceAll(r'\"', '"').trim();
+        final decoded = jsonDecode(imagesStr);
+        if (decoded is List && decoded.isNotEmpty) {
+          final firstItem = decoded[0];
+          if (firstItem is String && firstItem.startsWith('http')) {
+            return firstItem;
+          }
+        }
+      } else if (images is List && images.isNotEmpty) {
+        // Already a list
+        final firstItem = images[0];
+        if (firstItem is String && firstItem.startsWith('http')) {
+          return firstItem;
+        }
+      }
+    } catch (e) {
+      print("Error parsing images: $e");
+    }
+
+    return null;
   }
 
   // Auto-translate and save to Supabase

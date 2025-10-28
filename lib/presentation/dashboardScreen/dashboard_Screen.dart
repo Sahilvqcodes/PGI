@@ -53,6 +53,9 @@ class DashBoardScreen extends StatelessWidget {
                               }
                             }
 
+                            // Get first image URL
+                            String? imageUrl = controller.getFirstImageUrl(data['images']);
+
                             return GestureDetector(
                               onTap: () {
                                 print("data -- $data");
@@ -62,13 +65,10 @@ class DashBoardScreen extends StatelessWidget {
                                 margin: const EdgeInsets.symmetric(
                                     horizontal: 16, vertical: 6),
                                 child: ListTile(
-                                  leading: (data['images'] != null &&
-                                      data['images'] is List &&
-                                      data['images'].isNotEmpty)
+                                  leading: imageUrl != null
                                       ? CircleAvatar(
-                                    backgroundImage:
-                                    NetworkImage(data['images'][0]),
-                                  )
+                                          backgroundImage: NetworkImage(imageUrl),
+                                        )
                                       : const CircleAvatar(child: Icon(Icons.image)),
                                   title: Text(displayName),
                                   subtitle: Text(

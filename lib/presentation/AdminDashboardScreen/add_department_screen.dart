@@ -104,27 +104,104 @@ class AddDepartmentScreen extends StatelessWidget {
               height: 64,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: controller.images.length + 1,
+                itemCount: controller.existingImageUrls.length + controller.images.length + 1,
                 itemBuilder: (context, index) {
-                  if (index < controller.images.length) {
+                  // Display existing images from Supabase
+                  if (index < controller.existingImageUrls.length) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: Container(
-                        height: 64,
-                        width: 74,
-                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(6)),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(6),
-                          child: Image.file(
-                            controller.images[index],
+                      child: Stack(
+                        children: [
+                          Container(
                             height: 64,
                             width: 74,
-                            fit: BoxFit.cover,
+                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(6)),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(6),
+                              child: Image.network(
+                                controller.existingImageUrls[index],
+                                height: 64,
+                                width: 74,
+                                fit: BoxFit.cover,
+                                loadingBuilder: (context, child, loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return const Center(
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  );
+                                },
+                                errorBuilder: (context, error, stackTrace) {
+                                  return const Center(
+                                    child: Icon(Icons.error, color: Colors.red),
+                                  );
+                                },
+                              ),
+                            ),
                           ),
-                        ),
+                          Positioned(
+                            top: 2,
+                            right: 2,
+                            child: GestureDetector(
+                              onTap: () {
+                                controller.removeExistingImage(index);
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(2),
+                                decoration: const BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.close, color: Colors.white, size: 16),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     );
-                  } else {
+                  }
+                  // Display newly picked images
+                  else if (index < controller.existingImageUrls.length + controller.images.length) {
+                    final imageIndex = index - controller.existingImageUrls.length;
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Stack(
+                        children: [
+                          Container(
+                            height: 64,
+                            width: 74,
+                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(6)),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(6),
+                              child: Image.file(
+                                controller.images[imageIndex],
+                                height: 64,
+                                width: 74,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            top: 2,
+                            right: 2,
+                            child: GestureDetector(
+                              onTap: () {
+                                controller.removeNewImage(imageIndex);
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(2),
+                                decoration: const BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.close, color: Colors.white, size: 16),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  // Add button
+                  else {
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: GestureDetector(

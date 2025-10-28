@@ -32,7 +32,8 @@ class AdminDashboardScreen extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(vertical: 10),
                               itemCount: controller.filteredDepartments.length,
                               itemBuilder: (context, index) {
-                                var data = controller.filteredDepartments[index];
+                                var data =
+                                    controller.filteredDepartments[index];
                                 var recordId = data['id'].toString();
                                 var nameData = data['name'];
                                 print("DATA ---- $data");
@@ -49,23 +50,29 @@ class AdminDashboardScreen extends StatelessWidget {
                                   hindi = nameData['hindi'];
                                   punjabi = nameData['punjabi'];
 
-                                  displayName = controller.getDisplayName(nameData as Map<String, dynamic>, selectedLang);
+                                  displayName = controller.getDisplayName(
+                                      nameData as Map<String, dynamic>,
+                                      selectedLang);
 
                                   // Auto translate if needed
                                   if (nameId != null && english != null) {
-                                    controller.autoTranslateAndSave(nameId, english, hindi, punjabi);
+                                    controller.autoTranslateAndSave(
+                                        nameId, english, hindi, punjabi);
                                   }
                                 }
 
+                                // Get first image URL
+                                String? imageUrl =
+                                    controller.getFirstImageUrl(data['images']);
+
                                 return Card(
-                                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                                  margin: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 6),
                                   child: ListTile(
-                                    leading: (data['images'] != null &&
-                                            data['images'] is List &&
-                                            data['images'].isNotEmpty)
+                                    leading: imageUrl != null
                                         ? CircleAvatar(
                                             backgroundImage:
-                                                NetworkImage(data['images'][0]),
+                                                NetworkImage(imageUrl),
                                           )
                                         : const CircleAvatar(
                                             child: Icon(Icons.image)),
@@ -101,11 +108,14 @@ class AdminDashboardScreen extends StatelessWidget {
                                           ),
                                           onPressed: () {
                                             Get.defaultDialog(
-                                              titlePadding: EdgeInsets.only(top: 14),
-                                              contentPadding: EdgeInsets.all(14),
+                                              titlePadding:
+                                                  EdgeInsets.only(top: 14),
+                                              contentPadding:
+                                                  EdgeInsets.all(14),
                                               title: 'delete_department'.tr,
                                               middleText:
-                                                  'confirm_delete_department'.tr,
+                                                  'confirm_delete_department'
+                                                      .tr,
                                               titleStyle: const TextStyle(
                                                   color: Colors.black),
                                               middleTextStyle: const TextStyle(
@@ -114,9 +124,11 @@ class AdminDashboardScreen extends StatelessWidget {
                                               textCancel: 'no'.tr,
                                               confirmTextColor: Colors.white,
                                               cancelTextColor: Colors.black,
-                                              buttonColor: const Color(0xFF0D2C54),
+                                              buttonColor:
+                                                  const Color(0xFF0D2C54),
                                               onConfirm: () {
-                                                controller.deleteDepartment(recordId);
+                                                controller
+                                                    .deleteDepartment(recordId);
                                                 Get.back();
                                               },
                                               onCancel: () {
