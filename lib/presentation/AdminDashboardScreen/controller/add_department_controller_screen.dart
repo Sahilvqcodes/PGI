@@ -7,6 +7,7 @@ import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:translator/translator.dart';
 
 import '../admin_dashboard_screen.dart';
 import 'admin_dashboard_controller_screen.dart';
@@ -99,6 +100,84 @@ class AddDepartmentControllerScreen extends GetxController
     }
   }
 
+  /// Translate department name to all three languages
+  Future<Map<String, String>> translateDepartmentName(String inputText) async {
+    final translator = GoogleTranslator();
+
+    try {
+      print("🔍 Detecting language for: $inputText");
+
+      // First, check if text contains Devanagari script (Hindi)
+      bool isHindiScript = RegExp(r'[\u0900-\u097F]').hasMatch(inputText);
+      // Check if text contains Gurmukhi script (Punjabi)
+      bool isPunjabiScript = RegExp(r'[\u0A00-\u0A7F]').hasMatch(inputText);
+
+      String englishText = inputText;
+      String hindiText = inputText;
+      String punjabiText = inputText;
+
+      if (isHindiScript) {
+        // Input is in Hindi (Devanagari script)
+        print("🔍 Detected Hindi script (Devanagari)");
+        hindiText = inputText;
+
+        // Translate Hindi to English
+        final englishTranslation = await translator.translate(inputText, from: 'hi', to: 'en');
+        englishText = englishTranslation.text;
+        print("✅ Translated to English: $englishText");
+
+        // Translate English to Punjabi
+        final punjabiTranslation = await translator.translate(englishText, from: 'en', to: 'pa');
+        punjabiText = punjabiTranslation.text;
+        print("✅ Translated to Punjabi: $punjabiText");
+
+      } else if (isPunjabiScript) {
+        // Input is in Punjabi (Gurmukhi script)
+        print("🔍 Detected Punjabi script (Gurmukhi)");
+        punjabiText = inputText;
+
+        // Translate Punjabi to English
+        final englishTranslation = await translator.translate(inputText, from: 'pa', to: 'en');
+        englishText = englishTranslation.text;
+        print("✅ Translated to English: $englishText");
+
+        // Translate English to Hindi
+        final hindiTranslation = await translator.translate(englishText, from: 'en', to: 'hi');
+        hindiText = hindiTranslation.text;
+        print("✅ Translated to Hindi: $hindiText");
+
+      } else {
+        // Input is likely English (no Indic script detected)
+        print("🔍 Detected English (Latin script)");
+        englishText = inputText;
+
+        // Translate to Hindi
+        final hindiTranslation = await translator.translate(englishText, from: 'en', to: 'hi');
+        hindiText = hindiTranslation.text;
+        print("✅ Translated to Hindi: $hindiText");
+
+        // Translate to Punjabi
+        final punjabiTranslation = await translator.translate(englishText, from: 'en', to: 'pa');
+        punjabiText = punjabiTranslation.text;
+        print("✅ Translated to Punjabi: $punjabiText");
+      }
+
+      return {
+        'english': englishText,
+        'hindi': hindiText,
+        'punjabi': punjabiText,
+      };
+    } catch (e) {
+      print("❌ Translation error: $e");
+      // Fallback: return same text for all languages
+      return {
+        'english': inputText,
+        'hindi': inputText,
+        'punjabi': inputText,
+      };
+    }
+  }
+
   /// Upload a single image to Supabase Storage
   Future<String?> uploadImage(File file) async {
     try {
@@ -143,6 +222,9 @@ class AddDepartmentControllerScreen extends GetxController
         }
       }
 
+      // Translate department name to all three languages
+      final translations = await translateDepartmentName(departmentName.text.trim());
+
       String? nameId;
 
       if (isEditing && recordId != null) {
@@ -155,11 +237,11 @@ class AddDepartmentControllerScreen extends GetxController
 
         nameId = existing['name'];
 
-        // Update department_name table
+        // Update department_name table with properly translated values
         await _supabase.from('department_name').update({
-          'english': departmentName.text.trim(),
-          'hindi': departmentName.text.trim(), // Will be auto-translated
-          'punjabi': departmentName.text.trim(), // Will be auto-translated
+          'english': translations['english']!,
+          'hindi': translations['hindi']!,
+          'punjabi': translations['punjabi']!,
         }).eq('id', nameId!);
 
         // Update department table
@@ -173,13 +255,13 @@ class AddDepartmentControllerScreen extends GetxController
 
         Get.snackbar("Success", "Department updated successfully");
       } else {
-        // Create new department_name entry
+        // Create new department_name entry with properly translated values
         final nameResponse = await _supabase
             .from('department_name')
             .insert({
-              'english': departmentName.text.trim(),
-              'hindi': departmentName.text.trim(), // Will be auto-translated
-              'punjabi': departmentName.text.trim(), // Will be auto-translated
+              'english': translations['english']!,
+              'hindi': translations['hindi']!,
+              'punjabi': translations['punjabi']!,
             })
             .select()
             .single();

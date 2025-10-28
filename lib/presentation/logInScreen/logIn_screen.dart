@@ -17,11 +17,18 @@ class LogInScreen extends StatefulWidget {
 
 class _LogInScreenState extends State<LogInScreen> {
   @override
-  Widget build(BuildContext context) {
-    final controller = Get.isRegistered<LoginScreenController>()
-        ? Get.find<LoginScreenController>()
-        : Get.put(LoginScreenController());
+  void initState() {
+    super.initState();
+    // Delete old controller if it exists to avoid using disposed controllers
+    if (Get.isRegistered<LoginScreenController>()) {
+      Get.delete<LoginScreenController>();
+    }
+    // Create a fresh controller
+    Get.put(LoginScreenController());
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return GetBuilder<LoginScreenController>(
       builder: (controller) {
         return DefaultTabController(

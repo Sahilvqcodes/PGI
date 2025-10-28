@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:translator/translator.dart';
 
 class AdminDashboardControllerScreen extends GetxController {
   // Search controller
@@ -124,49 +123,6 @@ class AdminDashboardControllerScreen extends GetxController {
     }
 
     return null;
-  }
-
-  // Auto-translate and save to Supabase
-  Future<void> autoTranslateAndSave(
-      String nameId, String english, String? hindi, String? punjabi) async {
-    final translator = GoogleTranslator();
-
-    try {
-      // Skip if all 3 languages already exist
-      if (hindi != null &&
-          hindi.isNotEmpty &&
-          punjabi != null &&
-          punjabi.isNotEmpty &&
-          hindi != english &&
-          punjabi != english) {
-        return;
-      }
-
-      print("🌐 Translating: $english");
-
-      // Translate to Hindi if missing
-      String hindiText = (hindi == null || hindi.isEmpty || hindi == english)
-          ? (await translator.translate(english, to: 'hi')).text
-          : hindi;
-
-      // Translate to Punjabi if missing
-      String punjabiText = (punjabi == null || punjabi.isEmpty || punjabi == english)
-          ? (await translator.translate(english, to: 'pa')).text
-          : punjabi;
-
-      // Update department_name table
-      await _supabase.from('department_name').update({
-        'hindi': hindiText,
-        'punjabi': punjabiText,
-      }).eq('id', nameId);
-
-      print("✅ Supabase updated with Hindi & Punjabi translations");
-
-      // Refresh data to show updated translations
-      await fetchDepartments();
-    } catch (e) {
-      print("❌ Translation error: $e");
-    }
   }
 
   // Delete a department by ID

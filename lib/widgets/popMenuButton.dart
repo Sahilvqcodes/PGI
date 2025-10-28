@@ -142,8 +142,6 @@ class _CustomMenuDropdownState extends State<CustomMenuDropdown> {
                   await PrefUtils.setLanguageCode('en', 'US');
                   await PrefUtils.setLanguage(true);
                   Navigator.pop(context, "English");
-                  // Trigger re-filter in controllers
-                  _toggleDropdown();
                 },
               ),
               const Divider(),
@@ -155,8 +153,6 @@ class _CustomMenuDropdownState extends State<CustomMenuDropdown> {
                   await PrefUtils.setLanguageCode('hi', 'IN');
                   await PrefUtils.setLanguage(true);
                   Navigator.pop(context, "Hindi");
-                  // Trigger re-filter in controllers
-                  _toggleDropdown();
                 },
               ),
               const Divider(),
@@ -168,8 +164,6 @@ class _CustomMenuDropdownState extends State<CustomMenuDropdown> {
                   await PrefUtils.setLanguageCode('pa', 'IN');
                   await PrefUtils.setLanguage(true);
                   Navigator.pop(context, "Punjabi");
-                  // Trigger re-filter in controllers
-                  _toggleDropdown();
                 },
               ),
               Align(

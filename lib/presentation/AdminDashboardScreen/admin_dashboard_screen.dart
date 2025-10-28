@@ -36,29 +36,12 @@ class AdminDashboardScreen extends StatelessWidget {
                                     controller.filteredDepartments[index];
                                 var recordId = data['id'].toString();
                                 var nameData = data['name'];
-                                print("DATA ---- $data");
-
                                 String displayName = 'Unknown';
-                                String? nameId;
-                                String? english;
-                                String? hindi;
-                                String? punjabi;
 
                                 if (nameData != null && nameData is Map) {
-                                  nameId = nameData['id']?.toString();
-                                  english = nameData['english'];
-                                  hindi = nameData['hindi'];
-                                  punjabi = nameData['punjabi'];
-
                                   displayName = controller.getDisplayName(
                                       nameData as Map<String, dynamic>,
                                       selectedLang);
-
-                                  // Auto translate if needed
-                                  if (nameId != null && english != null) {
-                                    controller.autoTranslateAndSave(
-                                        nameId, english, hindi, punjabi);
-                                  }
                                 }
 
                                 // Get first image URL
