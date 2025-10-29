@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../widgets/custom_text_form_field.dart';
 import '../../widgets/popMenuButton.dart';
 import 'controller/dashboard_screen_controller.dart';
@@ -48,9 +49,9 @@ class DashBoardScreen extends StatelessWidget {
                               displayName = controller.getDisplayName(nameData as Map<String, dynamic>, selectedLang);
 
                               // Auto translate if needed
-                              if (nameId != null && english != null) {
-                                controller.autoTranslateAndSave(nameId, english, hindi, punjabi);
-                              }
+                              // if (nameId != null && english != null) {
+                              //   controller.autoTranslateAndSave(nameId, english, hindi, punjabi);
+                              // }
                             }
 
                             // Get first image URL
@@ -67,7 +68,30 @@ class DashBoardScreen extends StatelessWidget {
                                 child: ListTile(
                                   leading: imageUrl != null
                                       ? CircleAvatar(
-                                          backgroundImage: NetworkImage(imageUrl),
+                                          backgroundColor: Colors.grey[300],
+                                          child: ClipOval(
+                                            child: Image.network(
+                                              imageUrl,
+                                              fit: BoxFit.cover,
+                                              width: 40,
+                                              height: 40,
+                                              loadingBuilder: (context, child, loadingProgress) {
+                                                if (loadingProgress == null) return child;
+                                                return Shimmer.fromColors(
+                                                  baseColor: Colors.grey[400]!,
+                                                  highlightColor: Colors.grey[100]!,
+                                                  child: Container(
+                                                    width: 40,
+                                                    height: 40,
+                                                    color: Colors.white,
+                                                  ),
+                                                );
+                                              },
+                                              errorBuilder: (context, error, stackTrace) {
+                                                return const Icon(Icons.error, color: Colors.red);
+                                              },
+                                            ),
+                                          ),
                                         )
                                       : const CircleAvatar(child: Icon(Icons.image)),
                                   title: Text(displayName),

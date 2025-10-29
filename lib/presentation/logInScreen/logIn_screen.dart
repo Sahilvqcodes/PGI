@@ -88,25 +88,29 @@ class _LogInScreenState extends State<LogInScreen> {
                             dividerColor: Colors.transparent,
                             tabs:  [
                               Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 40),
+                                padding: EdgeInsets.symmetric(horizontal: 30),
                                 child: Tab(
-                                  child: Text(
-                                    "user".tr,
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
+                                  child: Center(
+                                    child: Text(
+                                      "user".tr,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
                               Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 40),
+                                padding: EdgeInsets.symmetric(horizontal: 30),
                                 child: Tab(
-                                  child: Text(
-                                    "admin".tr,
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
+                                  child: Center(
+                                    child: Text(
+                                      "admin".tr,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
                                   ),
                                 ),

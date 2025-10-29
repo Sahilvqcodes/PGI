@@ -11,6 +11,7 @@ class DashboardScreenController extends GetxController {
   List<Map<String, dynamic>> allDepartments = [];
   List<Map<String, dynamic>> filteredDepartments = [];
   bool isLoading = false;
+  Set<String> translatedIds = {}; // Track which departments have been translated
 
   @override
   void onInit() {
@@ -31,7 +32,8 @@ class DashboardScreenController extends GetxController {
 
       final data = await _supabase
           .from('department')
-          .select('id, name:department_name(id, english, hindi, punjabi), images, floor_number, location, room_number');
+          .select('id, name:department_name(id, english, hindi, punjabi), images, floor_number, location, room_number, created_at')
+          .order('created_at', ascending: false);
 
       allDepartments = List<Map<String, dynamic>>.from(data);
       filteredDepartments = List.from(allDepartments);
@@ -118,6 +120,11 @@ class DashboardScreenController extends GetxController {
   // Auto-translate and save to Supabase
   Future<void> autoTranslateAndSave(
       String nameId, String english, String? hindi, String? punjabi) async {
+    // Skip if already translated this department
+    if (translatedIds.contains(nameId)) {
+      return;
+    }
+
     final translator = GoogleTranslator();
 
     try {
@@ -128,10 +135,14 @@ class DashboardScreenController extends GetxController {
           punjabi.isNotEmpty &&
           hindi != english &&
           punjabi != english) {
+        translatedIds.add(nameId); // Mark as processed
         return;
       }
 
       print("🌐 Translating: $english");
+
+      // Mark as being translated to prevent duplicate calls
+      translatedIds.add(nameId);
 
       // Translate to Hindi if missing
       String hindiText = (hindi == null || hindi.isEmpty || hindi == english)
@@ -151,10 +162,12 @@ class DashboardScreenController extends GetxController {
 
       print("✅ Supabase updated with Hindi & Punjabi translations");
 
-      // Refresh data to show updated translations
-      await fetchDepartments();
+      // Refresh data to show updated translations (without showing loading)
+      await fetchDepartments(showLoading: false);
     } catch (e) {
       print("❌ Translation error: $e");
+      // Remove from translated set on error so it can be retried
+      translatedIds.remove(nameId);
     }
   }
 }

@@ -41,7 +41,8 @@ class AdminDashboardControllerScreen extends GetxController {
 
       final data = await _supabase
           .from('department')
-          .select('id, name:department_name(id, english, hindi, punjabi), images, floor_number, location, room_number');
+          .select('id, name:department_name(id, english, hindi, punjabi), images, floor_number, location, room_number, created_at')
+          .order('created_at', ascending: false);
 
       allDepartments = List<Map<String, dynamic>>.from(data);
       filteredDepartments = List.from(allDepartments);

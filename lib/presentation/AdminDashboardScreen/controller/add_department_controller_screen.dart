@@ -21,6 +21,7 @@ class AddDepartmentControllerScreen extends GetxController
   bool isLoading = false;
   final List<File> images = [];
   final List<String> existingImageUrls = []; // For editing existing images
+  final List<bool> imageLoadingStates = []; // Track loading state for each image
   final keyDepartment = GlobalKey<FormState>();
   bool fetchingLocation = false;
 
@@ -313,10 +314,21 @@ class AddDepartmentControllerScreen extends GetxController
     final picker = ImagePicker();
     final XFile? photo = await picker.pickImage(source: ImageSource.camera);
     if (photo != null) {
+      // Add loading state and placeholder immediately
+      imageLoadingStates.add(true);
+      images.add(File('')); // Temporary placeholder
+      update();
+
+      // Compress image in background
       File? compressed = await compressImage(File(photo.path));
       if (compressed != null) {
-        images.add(compressed);
+        images[images.length - 1] = compressed; // Replace placeholder with actual image
+        imageLoadingStates[imageLoadingStates.length - 1] = false;
         print("Image added from camera: ${compressed.path}");
+      } else {
+        // Remove failed image
+        images.removeLast();
+        imageLoadingStates.removeLast();
       }
       update();
     }
@@ -326,10 +338,21 @@ class AddDepartmentControllerScreen extends GetxController
     final picker = ImagePicker();
     final XFile? picked = await picker.pickImage(source: ImageSource.gallery);
     if (picked != null) {
+      // Add loading state and placeholder immediately
+      imageLoadingStates.add(true);
+      images.add(File('')); // Temporary placeholder
+      update();
+
+      // Compress image in background
       File? compressed = await compressImage(File(picked.path));
       if (compressed != null) {
-        images.add(compressed);
+        images[images.length - 1] = compressed; // Replace placeholder with actual image
+        imageLoadingStates[imageLoadingStates.length - 1] = false;
         print("Image added from gallery: ${compressed.path}");
+      } else {
+        // Remove failed image
+        images.removeLast();
+        imageLoadingStates.removeLast();
       }
       update();
     }
@@ -347,6 +370,9 @@ class AddDepartmentControllerScreen extends GetxController
   void removeNewImage(int index) {
     if (index >= 0 && index < images.length) {
       images.removeAt(index);
+      if (index < imageLoadingStates.length) {
+        imageLoadingStates.removeAt(index);
+      }
       update();
     }
   }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
+import 'package:shimmer/shimmer.dart';
 import '../../widgets/custom_text_form_field.dart';
 import '../../widgets/popMenuButton.dart';
 import 'add_department_screen.dart';
@@ -54,8 +54,30 @@ class AdminDashboardScreen extends StatelessWidget {
                                   child: ListTile(
                                     leading: imageUrl != null
                                         ? CircleAvatar(
-                                            backgroundImage:
-                                                NetworkImage(imageUrl),
+                                            backgroundColor: Colors.grey[300],
+                                            child: ClipOval(
+                                              child: Image.network(
+                                                imageUrl,
+                                                fit: BoxFit.cover,
+                                                width: 40,
+                                                height: 40,
+                                                loadingBuilder: (context, child, loadingProgress) {
+                                                  if (loadingProgress == null) return child;
+                                                  return Shimmer.fromColors(
+                                                    baseColor: Colors.grey[400]!,
+                                                    highlightColor: Colors.grey[100]!,
+                                                    child: Container(
+                                                      width: 40,
+                                                      height: 40,
+                                                      color: Colors.white,
+                                                    ),
+                                                  );
+                                                },
+                                                errorBuilder: (context, error, stackTrace) {
+                                                  return const Icon(Icons.error, color: Colors.red);
+                                                },
+                                              ),
+                                            ),
                                           )
                                         : const CircleAvatar(
                                             child: Icon(Icons.image)),

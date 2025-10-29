@@ -1,6 +1,7 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../widgets/custom_elevated_button.dart';
 import '../../widgets/custom_loading_container.dart';
 import '../../widgets/custom_text_form_field.dart';
@@ -125,8 +126,17 @@ class AddDepartmentScreen extends StatelessWidget {
                                 fit: BoxFit.cover,
                                 loadingBuilder: (context, child, loadingProgress) {
                                   if (loadingProgress == null) return child;
-                                  return const Center(
-                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  return Shimmer.fromColors(
+                                    baseColor: Colors.grey[400]!,
+                                    highlightColor: Colors.grey[100]!,
+                                    child: Container(
+                                      height: 64,
+                                      width: 74,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                    ),
                                   );
                                 },
                                 errorBuilder: (context, error, stackTrace) {
@@ -161,6 +171,9 @@ class AddDepartmentScreen extends StatelessWidget {
                   // Display newly picked images
                   else if (index < controller.existingImageUrls.length + controller.images.length) {
                     final imageIndex = index - controller.existingImageUrls.length;
+                    final isLoading = imageIndex < controller.imageLoadingStates.length &&
+                                      controller.imageLoadingStates[imageIndex];
+
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: Stack(
@@ -171,31 +184,50 @@ class AddDepartmentScreen extends StatelessWidget {
                             decoration: BoxDecoration(borderRadius: BorderRadius.circular(6)),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(6),
-                              child: Image.file(
-                                controller.images[imageIndex],
-                                height: 64,
-                                width: 74,
-                                fit: BoxFit.cover,
-                              ),
+                              child: isLoading
+                                  ? Shimmer.fromColors(
+                                      baseColor: Colors.grey[400]!,
+                                      highlightColor: Colors.grey[100]!,
+                                      child: Container(
+                                        height: 64,
+                                        width: 74,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                      ),
+                                    )
+                                  : Image.file(
+                                      controller.images[imageIndex],
+                                      height: 64,
+                                      width: 74,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return const Center(
+                                          child: Icon(Icons.error, color: Colors.red),
+                                        );
+                                      },
+                                    ),
                             ),
                           ),
-                          Positioned(
-                            top: 2,
-                            right: 2,
-                            child: GestureDetector(
-                              onTap: () {
-                                controller.removeNewImage(imageIndex);
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.all(2),
-                                decoration: const BoxDecoration(
-                                  color: Colors.red,
-                                  shape: BoxShape.circle,
+                          if (!isLoading)
+                            Positioned(
+                              top: 2,
+                              right: 2,
+                              child: GestureDetector(
+                                onTap: () {
+                                  controller.removeNewImage(imageIndex);
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(2),
+                                  decoration: const BoxDecoration(
+                                    color: Colors.red,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(Icons.close, color: Colors.white, size: 16),
                                 ),
-                                child: const Icon(Icons.close, color: Colors.white, size: 16),
                               ),
                             ),
-                          ),
                         ],
                       ),
                     );
