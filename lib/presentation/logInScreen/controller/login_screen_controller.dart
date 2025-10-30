@@ -49,10 +49,10 @@ class LoginScreenController extends GetxController {
 
           Get.offAll(() => const AdminDashboardScreen());
         } else if (!isAdmin && role == "user") {
-          CustomToast.showToast(
-            "User Login successfully",
-            color: Colors.green,
-          );
+          // CustomToast.showToast(
+          //   "User Login successfully",
+          //   color: Colors.green,
+          // );
 
           // Save login state
           await PrefUtils.setLoggedIn(true);

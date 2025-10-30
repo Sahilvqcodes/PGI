@@ -260,7 +260,7 @@ class AddDepartmentControllerScreen extends GetxController
           'updated_at': DateTime.now().toIso8601String(),
         }).eq('id', recordId!);
 
-        Get.snackbar("Success", "Department updated successfully");
+        // Get.snackbar("Success", "Department updated successfully");
       } else {
         final nameResponse = await _supabase
             .from('department_name')
@@ -283,7 +283,7 @@ class AddDepartmentControllerScreen extends GetxController
           'updated_at': DateTime.now().toIso8601String(),
         });
 
-        Get.snackbar("Success", "Department added successfully");
+        // Get.snackbar("Success", "Department added successfully");
       }
 
       // Clear form

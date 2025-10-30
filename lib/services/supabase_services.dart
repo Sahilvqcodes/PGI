@@ -19,35 +19,56 @@ class SupabaseServices {
       final user = authResponse.user;
 
       if (user != null) {
-        // Insert into custom "user" table
-        await _supabase.from('user').insert({
-          'uid': user.id,
-          'email': email,
-          'name': name,
-          'role': role,
-          'created_at': DateTime.now().toIso8601String(),
-        });
+        try {
+          // Insert into custom "user" table
+          final insertResponse = await _supabase.from('user').insert({
+            'uid': user.id,
+            'email': email,
+            'name': name,
+            'role': role,
+            'created_at': DateTime.now().toIso8601String(),
+          }).select();
 
-        return {
-          'success': true,
-          'user': user,
-          'uid': user.id,
-          'email': email,
-          'name': name,
-          'role': role,
-        };
+          return {
+            'success': true,
+            'user': user,
+            'uid': user.id,
+            'email': email,
+            'name': name,
+            'role': role,
+          };
+        } catch (insertError) {
+          print('❌ Database insert failed: $insertError');
+          print('❌ Insert error type: ${insertError.runtimeType}');
+
+          // Cleanup: Delete the auth user if database insert fails
+          try {
+            await _supabase.auth.admin.deleteUser(user.id);
+            print('🧹 Cleaned up auth user after database insert failure');
+          } catch (cleanupError) {
+            print('⚠️ Could not cleanup auth user: $cleanupError');
+          }
+
+          return {
+            'success': false,
+            'error': 'Failed to save user details: ${insertError.toString()}',
+          };
+        }
       } else {
+        print('❌ Auth signup returned null user');
         return {
           'success': false,
-          'error': 'User creation failed',
+          'error': 'User creation failed - no user returned',
         };
       }
     } on AuthException catch (e) {
+      print('❌ Auth exception during signup: ${e.message}');
       return {
         'success': false,
         'error': e.message,
       };
     } catch (e) {
+      print('❌ Unexpected error during signup: $e');
       return {
         'success': false,
         'error': e.toString(),
@@ -142,14 +163,13 @@ class SupabaseServices {
   static Future<Map<String, dynamic>?> getUserDetails(String uid) async {
     try {
       final response =
-      await _supabase.from('user').select().eq('uid', uid).maybeSingle();
+          await _supabase.from('user').select().eq('uid', uid).maybeSingle();
       return response;
     } catch (e) {
       print('Error fetching user details: $e');
       return null;
     }
   }
-
 
   // Get user details by email
   static Future<Map<String, dynamic>?> getUserByEmail(String email) async {

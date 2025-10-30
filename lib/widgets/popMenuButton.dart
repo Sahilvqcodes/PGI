@@ -18,6 +18,7 @@ class _CustomMenuDropdownState extends State<CustomMenuDropdown> {
   OverlayEntry? _overlayEntry;
   final LayerLink _layerLink = LayerLink();
   bool _isDropdownOpen = false;
+  bool isLogoutClicked = false;
 
   void _toggleDropdown() {
     if (_isDropdownOpen) {
@@ -74,13 +75,26 @@ class _CustomMenuDropdownState extends State<CustomMenuDropdown> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      _buildMenuItem("logout".tr, () async{
-                        print("Logout clicked");
-                        await SupabaseServices.signOut();
-                        await PrefUtils.clearPreferencesData();
-                        Get.offAll(()=> LogInScreen());
-                      }),
-                      _buildMenuItem("language_select".tr, () async{
+                      _buildMenuItem(
+                        "logout".tr,
+                        isLogoutClicked
+                            ? () {}
+                            : () async {
+                                isLogoutClicked = true;
+                                setState(
+                                    () {}); // Update UI immediately to disable button
+
+                                try {
+                                  print("Logout clicked");
+                                  await SupabaseServices.signOut();
+                                  await PrefUtils.clearPreferencesData();
+                                  Get.offAll(() => LogInScreen());
+                                } catch (e) {
+                                  print("Error during logout: $e");
+                                }
+                              },
+                      ),
+                      _buildMenuItem("language_select".tr, () async {
                         showLanguageDialog();
                         print("Language select clicked");
 
@@ -105,7 +119,8 @@ class _CustomMenuDropdownState extends State<CustomMenuDropdown> {
         alignment: Alignment.centerLeft,
         child: Text(
           text,
-          style: const TextStyle(fontSize: 16, color: Colors.black87,fontWeight: FontWeight.w500),
+          style: const TextStyle(
+              fontSize: 16, color: Colors.black87, fontWeight: FontWeight.w500),
         ),
       ),
     );
@@ -122,15 +137,16 @@ class _CustomMenuDropdownState extends State<CustomMenuDropdown> {
     );
   }
 
-
   void showLanguageDialog() {
     showDialog(
       context: Get.context!,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title:  Text("choose_language".tr, style: TextStyle(fontWeight: FontWeight.bold)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Text("choose_language".tr,
+              style: TextStyle(fontWeight: FontWeight.bold)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -173,7 +189,7 @@ class _CustomMenuDropdownState extends State<CustomMenuDropdown> {
                     await PrefUtils.setLanguage(true);
                     Navigator.pop(context, "Skip");
                   },
-                  child:  Text("skip".tr),
+                  child: Text("skip".tr),
                 ),
               ),
             ],
@@ -186,5 +202,4 @@ class _CustomMenuDropdownState extends State<CustomMenuDropdown> {
       }
     });
   }
-
 }
