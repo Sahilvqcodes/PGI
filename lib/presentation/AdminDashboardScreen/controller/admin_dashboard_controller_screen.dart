@@ -1,16 +1,13 @@
 import 'dart:convert';
+import 'package:chandigarh/widgets/custom_toast.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AdminDashboardControllerScreen extends GetxController {
-  // Search controller
   TextEditingController searchController = TextEditingController();
-
-  // Supabase client reference
   final SupabaseClient _supabase = Supabase.instance.client;
-
-  // Data
   List<Map<String, dynamic>> allDepartments = [];
   List<Map<String, dynamic>> filteredDepartments = [];
   bool isLoading = false;
@@ -18,7 +15,6 @@ class AdminDashboardControllerScreen extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // Trigger update whenever search text changes
     searchController.addListener(() {
       filterDepartments();
     });
@@ -40,6 +36,7 @@ class AdminDashboardControllerScreen extends GetxController {
       }
 
       final data = await _supabase
+
           .from('department')
           .select('id, name:department_name(id, english, hindi, punjabi), images, floor_number, location, room_number, created_at')
           .order('created_at', ascending: false);
@@ -56,7 +53,6 @@ class AdminDashboardControllerScreen extends GetxController {
         isLoading = false;
       }
       update();
-      Get.snackbar('Error', 'Failed to fetch departments: ${e.toString()}');
     }
   }
 
@@ -148,10 +144,9 @@ class AdminDashboardControllerScreen extends GetxController {
 
       // Refresh the list to reflect changes (silently, without loading indicator)
       await fetchDepartments(showLoading: false);
-
-      Get.snackbar('Success', 'Department deleted successfully');
+CustomToast.showToast("Department deleted",color: Colors.green,);
     } catch (e) {
-      Get.snackbar('Error', 'Failed to delete department: ${e.toString()}');
+      CustomToast.showToast("Failed to delete department");
     }
   }
 
@@ -159,9 +154,9 @@ class AdminDashboardControllerScreen extends GetxController {
   Future<void> updateDepartment(String id, Map<String, dynamic> updatedData) async {
     try {
       await _supabase.from('department').update(updatedData).eq('id', id);
-      Get.snackbar('Success', 'Department updated successfully');
+      CustomToast.showToast("Department updated",color: Colors.green,);
     } catch (e) {
-      Get.snackbar('Error', 'Failed to update department: ${e.toString()}');
+      CustomToast.showToast("Failed to update department");
     }
   }
 }

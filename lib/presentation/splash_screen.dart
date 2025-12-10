@@ -128,7 +128,22 @@ class SplashScreenState extends State<SplashScreen> {
                     await PrefUtils.setLanguage(true);
                     Navigator.pop(context, "Skip");
                   },
-                  child: const Text("Skip"),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0D2C54), // background color of the container
+                      border: Border.all(color: const Color(0xFF0D2C54)), // border color
+                      borderRadius: BorderRadius.circular(22), // rounded corners
+                    ),
+                    child: Text(
+                      "skip".tr,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  )
                 ),
               ),
             ],

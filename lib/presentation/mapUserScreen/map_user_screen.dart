@@ -11,6 +11,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 
 import '../../main.dart';
+import '../../widgets/custom_toast.dart';
 
 class PgiMapScreen extends StatefulWidget {
   const PgiMapScreen({super.key});
@@ -66,7 +67,7 @@ class _PgiMapScreenState extends State<PgiMapScreen> {
       // 1) Location permission
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        Get.snackbar('Location', 'Please enable location services');
+        CustomToast.showToast("Please enable location services");
         return;
       }
 
@@ -74,12 +75,12 @@ class _PgiMapScreenState extends State<PgiMapScreen> {
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          Get.snackbar('Permission', 'Location permission denied');
+          CustomToast.showToast("Location permission denied");
           return;
         }
       }
       if (permission == LocationPermission.deniedForever) {
-        Get.snackbar('Permission', 'Location permission permanently denied');
+        CustomToast.showToast("Location permission permanently denied");
         return;
       }
 
@@ -140,7 +141,6 @@ class _PgiMapScreenState extends State<PgiMapScreen> {
       });
     } catch (e) {
       print('Init error: $e');
-      Get.snackbar('Error', 'Something went wrong: $e');
     } finally {
       setState(() {});
     }

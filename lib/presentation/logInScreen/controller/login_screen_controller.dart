@@ -38,22 +38,12 @@ class LoginScreenController extends GetxController {
         final role = result['role'];
 
         if (isAdmin && role == "admin") {
-          CustomToast.showToast(
-            "Admin Login successfully",
-            color: Colors.green,
-          );
-
           // Save login state
           await PrefUtils.setLoggedIn(true);
           await PrefUtils.setUserRole("admin");
 
           Get.offAll(() => const AdminDashboardScreen());
         } else if (!isAdmin && role == "user") {
-          // CustomToast.showToast(
-          //   "User Login successfully",
-          //   color: Colors.green,
-          // );
-
           // Save login state
           await PrefUtils.setLoggedIn(true);
           await PrefUtils.setUserRole("user");
@@ -64,19 +54,16 @@ class LoginScreenController extends GetxController {
           await SupabaseServices.signOut();
           CustomToast.showToast(
             "Access Denied,\nThis account doesn't have permission for this login.",
-            color: Colors.red,
           );
         }
       } else {
         CustomToast.showToast(
           result['error'] ?? "Login failed",
-          color: Colors.red,
         );
       }
     } catch (e) {
       CustomToast.showToast(
         "Login error: ${e.toString()}",
-        color: Colors.red,
       );
     } finally {
       isLoading = false;

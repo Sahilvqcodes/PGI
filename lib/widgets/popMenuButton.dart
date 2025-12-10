@@ -136,70 +136,86 @@ class _CustomMenuDropdownState extends State<CustomMenuDropdown> {
       ),
     );
   }
+}
 
-  void showLanguageDialog() {
-    showDialog(
-      context: Get.context!,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: Text("choose_language".tr,
-              style: TextStyle(fontWeight: FontWeight.bold)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.language, color: Colors.blue),
-                title: const Text("English"),
-                onTap: () async {
-                  Get.updateLocale(const Locale('en', 'US'));
-                  await PrefUtils.setLanguageCode('en', 'US');
+void showLanguageDialog() {
+  showDialog(
+    context: Get.context!,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        shape:
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text("choose_language".tr,
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.language, color: Colors.blue),
+              title: const Text("English"),
+              onTap: () async {
+                Get.updateLocale(const Locale('en', 'US'));
+                await PrefUtils.setLanguageCode('en', 'US');
+                await PrefUtils.setLanguage(true);
+                Navigator.pop(context, "English");
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.translate, color: Colors.green),
+              title: const Text("हिंदी (Hindi)"),
+              onTap: () async {
+                Get.updateLocale(const Locale('hi', 'IN'));
+                await PrefUtils.setLanguageCode('hi', 'IN');
+                await PrefUtils.setLanguage(true);
+                Navigator.pop(context, "Hindi");
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.g_translate, color: Colors.red),
+              title: const Text("ਪੰਜਾਬੀ (Punjabi)"),
+              onTap: () async {
+                Get.updateLocale(const Locale('pa', 'IN'));
+                await PrefUtils.setLanguageCode('pa', 'IN');
+                await PrefUtils.setLanguage(true);
+                Navigator.pop(context, "Punjabi");
+              },
+            ),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: TextButton(
+                onPressed: () async {
                   await PrefUtils.setLanguage(true);
-                  Navigator.pop(context, "English");
+                  Navigator.pop(context, "Skip");
                 },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0D2C54), // background color of the container
+                    border: Border.all(color: const Color(0xFF0D2C54)), // border color
+                    borderRadius: BorderRadius.circular(22), // rounded corners
+                  ),
+                  child: Text(
+                    "skip".tr,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                )
+
               ),
-              const Divider(),
-              ListTile(
-                leading: const Icon(Icons.translate, color: Colors.green),
-                title: const Text("हिंदी (Hindi)"),
-                onTap: () async {
-                  Get.updateLocale(const Locale('hi', 'IN'));
-                  await PrefUtils.setLanguageCode('hi', 'IN');
-                  await PrefUtils.setLanguage(true);
-                  Navigator.pop(context, "Hindi");
-                },
-              ),
-              const Divider(),
-              ListTile(
-                leading: const Icon(Icons.g_translate, color: Colors.red),
-                title: const Text("ਪੰਜਾਬੀ (Punjabi)"),
-                onTap: () async {
-                  Get.updateLocale(const Locale('pa', 'IN'));
-                  await PrefUtils.setLanguageCode('pa', 'IN');
-                  await PrefUtils.setLanguage(true);
-                  Navigator.pop(context, "Punjabi");
-                },
-              ),
-              Align(
-                alignment: Alignment.bottomRight,
-                child: TextButton(
-                  onPressed: () async {
-                    await PrefUtils.setLanguage(true);
-                    Navigator.pop(context, "Skip");
-                  },
-                  child: Text("skip".tr),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    ).then((value) {
-      if (value != null) {
-        print("🌐 Selected Language: $value");
-      }
-    });
-  }
+            ),
+          ],
+        ),
+      );
+    },
+  ).then((value) {
+    if (value != null) {
+      print("🌐 Selected Language: $value");
+    }
+  });
 }

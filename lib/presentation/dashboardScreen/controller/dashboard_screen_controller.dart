@@ -47,7 +47,6 @@ class DashboardScreenController extends GetxController {
         isLoading = false;
       }
       update();
-      Get.snackbar('Error', 'Failed to fetch departments: ${e.toString()}');
     }
   }
 

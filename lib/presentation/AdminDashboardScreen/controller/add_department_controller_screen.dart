@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:translator/translator.dart';
+import '../../../widgets/custom_toast.dart';
 import '../admin_dashboard_screen.dart';
 import 'admin_dashboard_controller_screen.dart';
 
@@ -21,7 +22,8 @@ class AddDepartmentControllerScreen extends GetxController
   bool isLoading = false;
   final List<File> images = [];
   final List<String> existingImageUrls = []; // For editing existing images
-  final List<bool> imageLoadingStates = []; // Track loading state for each image
+  final List<bool> imageLoadingStates =
+      []; // Track loading state for each image
   final keyDepartment = GlobalKey<FormState>();
   bool fetchingLocation = false;
 
@@ -143,6 +145,7 @@ class AddDepartmentControllerScreen extends GetxController
     try {
       bool isHindiScript = RegExp(r'[\u0900-\u097F]').hasMatch(inputText);
       bool isPunjabiScript = RegExp(r'[\u0A00-\u0A7F]').hasMatch(inputText);
+
       String englishText = inputText;
       String hindiText = inputText;
       String punjabiText = inputText;
@@ -173,6 +176,13 @@ class AddDepartmentControllerScreen extends GetxController
         punjabiText = punjabiTranslation.text;
       }
 
+      // --- Smart fallback ---
+      if (hindiText.toLowerCase() == englishText.toLowerCase()) {
+        hindiText = await smartTransliteration(englishText, 'hi', translator);
+      }
+      if (punjabiText.toLowerCase() == englishText.toLowerCase()) {
+        punjabiText = await smartTransliteration(englishText, 'pa', translator);
+      }
       return {
         'english': englishText,
         'hindi': hindiText,
@@ -229,7 +239,7 @@ class AddDepartmentControllerScreen extends GetxController
         if (url != null) {
           imageUrls.add(url);
         } else {
-          Get.snackbar("Error", "Image upload failed");
+          CustomToast.showToast("Image upload failed");
         }
       }
       final translations =
@@ -259,8 +269,7 @@ class AddDepartmentControllerScreen extends GetxController
           'images': imageUrls,
           'updated_at': DateTime.now().toIso8601String(),
         }).eq('id', recordId!);
-
-        // Get.snackbar("Success", "Department updated successfully");
+        CustomToast.showToast("Department updated successfully",color: Colors.green,);
       } else {
         final nameResponse = await _supabase
             .from('department_name')
@@ -282,8 +291,7 @@ class AddDepartmentControllerScreen extends GetxController
           'created_at': DateTime.now().toIso8601String(),
           'updated_at': DateTime.now().toIso8601String(),
         });
-
-        // Get.snackbar("Success", "Department added successfully");
+        CustomToast.showToast("Department added successfully",color: Colors.green,);
       }
 
       // Clear form
@@ -303,7 +311,7 @@ class AddDepartmentControllerScreen extends GetxController
       Get.offAll(() => AdminDashboardScreen());
     } catch (e) {
       print("Supabase error: $e");
-      Get.snackbar("Error", "Failed to save department: ${e.toString()}");
+      CustomToast.showToast("Failed to save department");
     } finally {
       isLoading = false;
       update();
@@ -322,7 +330,8 @@ class AddDepartmentControllerScreen extends GetxController
       // Compress image in background
       File? compressed = await compressImage(File(photo.path));
       if (compressed != null) {
-        images[images.length - 1] = compressed; // Replace placeholder with actual image
+        images[images.length - 1] =
+            compressed; // Replace placeholder with actual image
         imageLoadingStates[imageLoadingStates.length - 1] = false;
         print("Image added from camera: ${compressed.path}");
       } else {
@@ -346,7 +355,8 @@ class AddDepartmentControllerScreen extends GetxController
       // Compress image in background
       File? compressed = await compressImage(File(picked.path));
       if (compressed != null) {
-        images[images.length - 1] = compressed; // Replace placeholder with actual image
+        images[images.length - 1] =
+            compressed; // Replace placeholder with actual image
         imageLoadingStates[imageLoadingStates.length - 1] = false;
         print("Image added from gallery: ${compressed.path}");
       } else {
@@ -477,5 +487,87 @@ class AddDepartmentControllerScreen extends GetxController
       ),
       barrierDismissible: false,
     );
+  }
+
+  Future<String> smartTransliteration(
+      String word, String to, GoogleTranslator translator) async {
+    final match = RegExp(r'^([A-Z][a-z]?)([a-z]+)$').firstMatch(word);
+    if (match != null) {
+      String prefix = match.group(1)!;
+      String suffix = match.group(2)!;
+
+      final translatedSuffix =
+          (await translator.translate(suffix, from: 'en', to: to)).text;
+
+      final transliteratedPrefix = transliterateLetters(prefix, to);
+
+      return "$transliteratedPrefix$translatedSuffix";
+    }
+
+    return transliterateLetters(word, to);
+  }
+
+  String transliterateLetters(String word, String to) {
+    final hindiMap = {
+      'a': 'ए',
+      'b': 'बी',
+      'c': 'सी',
+      'd': 'डी',
+      'e': 'ई',
+      'f': 'एफ',
+      'g': 'जी',
+      'h': 'एच',
+      'i': 'आई',
+      'j': 'जे',
+      'k': 'के',
+      'l': 'एल',
+      'm': 'एम',
+      'n': 'एन',
+      'o': 'ओ',
+      'p': 'पी',
+      'q': 'क्यू',
+      'r': 'आर',
+      's': 'एस',
+      't': 'टी',
+      'u': 'यू',
+      'v': 'वी',
+      'w': 'डब्ल्यू',
+      'x': 'एक्स',
+      'y': 'वाई',
+      'z': 'जेड'
+    };
+
+    final punjabiMap = {
+      'a': 'ਏ',
+      'b': 'ਬੀ',
+      'c': 'ਸੀ',
+      'd': 'ਡੀ',
+      'e': 'ਈ',
+      'f': 'ਐਫ',
+      'g': 'ਜੀ',
+      'h': 'ਐਚ',
+      'i': 'ਆਈ',
+      'j': 'ਜੇ',
+      'k': 'ਕੇ',
+      'l': 'ਐਲ',
+      'm': 'ਐਮ',
+      'n': 'ਐਨ',
+      'o': 'ਓ',
+      'p': 'ਪੀ',
+      'q': 'ਕਿਊ',
+      'r': 'ਆਰ',
+      's': 'ਐਸ',
+      't': 'ਟੀ',
+      'u': 'ਯੂ',
+      'v': 'ਵੀ',
+      'w': 'ਡਬਲਯੂ',
+      'x': 'ਐਕਸ',
+      'y': 'ਵਾਈ',
+      'z': 'ਜੈਡ'
+    };
+
+    final map = to == 'hi' ? hindiMap : punjabiMap;
+
+    return word.split('').map((ch) => map[ch.toLowerCase()] ?? ch).join('');
   }
 }

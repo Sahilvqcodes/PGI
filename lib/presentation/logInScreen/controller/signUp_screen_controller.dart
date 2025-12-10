@@ -67,7 +67,6 @@ class SignUpScreenController extends GetxController {
       } else {
         CustomToast.showToast(
           result['error'] ?? "Signup failed",
-          color: Colors.red,
         );
       }
     } catch (e) {
@@ -75,7 +74,6 @@ class SignUpScreenController extends GetxController {
       update();
       CustomToast.showToast(
         "Signup error: ${e.toString()}",
-        color: Colors.red,
       );
     }
   }

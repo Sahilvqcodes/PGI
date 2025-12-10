@@ -1,8 +1,10 @@
 import 'package:chandigarh/presentation/logInScreen/logIn_screen.dart';
 import 'package:chandigarh/widgets/custom_loading_container.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../core/image_constants.dart';
+import '../../widgets/popMenuButton.dart';
 import 'controller/signUp_screen_controller.dart';
 import 'package:chandigarh/widgets/custom_text_form_field.dart';
 import 'package:chandigarh/widgets/custom_elevated_button.dart';
@@ -24,40 +26,58 @@ class _SignUpScreenState extends State<SignUpScreen> {
       builder: (controller) {
         return Scaffold(
           backgroundColor: const Color(0xFF0D2C54),
-          body: Column(
+          body: Stack(
             children: [
-              // Logo
-              Expanded(
-                flex: 3,
-                child: Center(
-                  child: Image.asset(
-                    ImageConstant.logoImage,
-                    fit: BoxFit.contain,
-                    width: 200,
-                    height: 200,
+              Column(
+                children: [
+                  // Logo
+                  Expanded(
+                    flex: 3,
+                    child: Center(
+                      child: Image.asset(
+                        ImageConstant.logoImage,
+                        fit: BoxFit.contain,
+                        width: 200,
+                        height: 200,
+                      ),
+                    ),
                   ),
-                ),
-              ),
 
-              // SignUp Form
-              Expanded(
-                flex: 5,
-                child: Container(
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(50),
-                      topRight: Radius.circular(50),
+                  // SignUp Form
+                  Expanded(
+                    flex: 5,
+                    child: Container(
+                      width: double.infinity,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(50),
+                          topRight: Radius.circular(50),
+                        ),
+                      ),
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 30, vertical: 20),
+                        child: Form(
+                          key: controller.signUpUserFormKey,
+                          child: signUpForm(controller, isAdmin: false),
+                        ),
+                      ),
                     ),
                   ),
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 30, vertical: 20),
-                    child: Form(
-                      key: controller.signUpUserFormKey,
-                      child: signUpForm(controller, isAdmin: false),
-                    ),
+                ],
+              ),
+              Positioned(
+                top: 50,
+                right: 16,
+                child: GestureDetector(
+                  onTap: () {
+                    showLanguageDialog();
+                  },
+                  child: Icon(
+                    Icons.language,
+                    color: Colors.white,
+                    size: 28,
                   ),
                 ),
               ),
@@ -76,6 +96,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
         CustomTextFormField(
           controller: controller.signUpNameController,
           hintText: "enter_name".tr,
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9 ]')),
+          ],
           prefixIcon: const Icon(Icons.person,
               color: Color(0xFF0D2C54), size: 20),
           validator: (value) =>
@@ -85,6 +108,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
         CustomTextFormField(
           controller: controller.signUpEmailController,
           hintText: "enter_email".tr,
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(
+              RegExp(r'[a-zA-Z0-9@._\-]'), // added @ . _ -
+            ),
+          ],
           prefixIcon: const Icon(Icons.email_outlined,
               color: Color(0xFF0D2C54), size: 20),
           validator: (value) {
@@ -101,6 +129,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
         CustomTextFormField(
           controller: controller.signUpPasswordController,
           hintText: "enter_password".tr,
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(
+              RegExp(r'[a-zA-Z0-9!@#\$%\^&*()_\-+=<>?/.,;:]'),
+            ),
+          ],
           obscureText: controller.isHidden,
           prefixIcon: const Icon(Icons.lock_outlined,
               color: Color(0xFF0D2C54), size: 20),
